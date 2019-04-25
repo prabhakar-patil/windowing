@@ -2,9 +2,12 @@
 
 #include <QPainter>
 #include <QString>
+#include "bst.h"
 
 #define DEF_NODE_WIDTH  (80)
 #define DEF_NODE_HEIGHT (50)
+
+extern bst_t *m_bst;
 
 RenderArea::RenderArea(QWidget *parent)
     : QWidget(parent)
@@ -39,6 +42,80 @@ RenderArea::RenderArea(QWidget *parent)
 
 //}
 
+//void RenderArea::paintEvent(QPaintEvent * /* event */)
+//{
+//    QPainter painter(this);
+//    painter.setRenderHint(QPainter::Antialiasing, true);
+//    painter.setPen(QPen(Qt::black)); //, 12, Qt::DashDotLine, Qt::RoundCap));
+//    painter.setBrush(QBrush(Qt::red, Qt::SolidPattern));
+
+
+//    int width = this->width();
+//    int height = this->height();
+//    int centerX = width/2 - m_nodeWidth/2;
+
+//    this->drawNode(painter, QPoint(centerX,80), width);
+//    this->drawNode(painter, QPoint(centerX+80,160), height);
+//    this->connectNode(painter, QPoint(centerX,80), QPoint(centerX+80,160));
+//}
+
+//void RenderArea::paintEvent(QPaintEvent * /* event */)
+//{
+//    QPainter painter(this);
+//    painter.setRenderHint(QPainter::Antialiasing, true);
+//    painter.setPen(QPen(Qt::black)); //, 12, Qt::DashDotLine, Qt::RoundCap));
+//    painter.setBrush(QBrush(Qt::red, Qt::SolidPattern));
+
+
+//    int width = this->width();
+//    //int height = this->height();
+//    int centerX = width/2 - m_nodeWidth/2;
+//    int xDiff = 80;
+//    int yDiff = 80;
+//    int currentX = centerX;
+//    int currentY = yDiff;
+//    bool prevLeft = false;
+
+//    bst_node_t *run = m_bst->root_node;
+//    stack_t *st = ::create_stack();
+//    res_t res = STACK_SUCCESS;
+//    Q_ASSERT(run);
+
+//    //printf("[beg]<->");
+
+//    while(TRUE)
+//    {
+//        //walk through LST,  keep printing and pushing
+//        while(run != NULL)
+//        {
+//            //printf("[%d]<->", run->data);
+//            this->drawNode(painter, QPoint(currentX,currentY), run->data);
+//            push(st, run);
+//            run = run->left;
+//            currentX = currentX - xDiff;
+//            currentY = currentY + yDiff;
+//        }
+//        currentX = currentX + xDiff;
+//        currentY = currentY - yDiff;
+
+//        //check if each and every node is processed
+//        //if yes, break the loop
+//        res = pop(st, &run);
+//        Q_ASSERT(res == STACK_SUCCESS || res == STACK_EMPTY);
+//        if(res == BST_EMPTY)
+//            break;
+//        currentX = (run == m_bst->root_node) ?
+//                    (currentX + xDiff):
+//                    (run == run->parent->right) ? (currentX - xDiff):(currentX + xDiff);
+//        currentY = currentY - yDiff;
+
+//        //if no, walk through RST
+//        run = run->right;
+//        currentX = currentX + xDiff;
+//        currentY = currentY + yDiff;
+//    }
+//}
+
 void RenderArea::paintEvent(QPaintEvent * /* event */)
 {
     QPainter painter(this);
@@ -48,12 +125,52 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 
 
     int width = this->width();
-    int height = this->height();
+    //int height = this->height();
     int centerX = width/2 - m_nodeWidth/2;
+    int xDiff = 80;
+    int yDiff = 80;
+    int currentX = centerX;
+    int currentY = yDiff;
 
-    this->drawNode(painter, QPoint(centerX,80), width);
-    this->drawNode(painter, QPoint(centerX+80,160), height);
-    this->connectNode(painter, QPoint(centerX,80), QPoint(centerX+80,160));
+    bst_node_t *run = m_bst->root_node;
+    stack_t *st = ::create_stack();
+    res_t res = STACK_SUCCESS;
+    Q_ASSERT(run);
+
+
+    while(TRUE)
+    {
+
+        this->drawNode(painter, QPoint(currentX,currentY), run->data);
+        //push(st, run);
+
+        if(run->left != NULL)
+        {
+            currentX = currentX - xDiff;
+            currentY = currentY + yDiff;
+            this->drawNode(painter, QPoint(currentX,currentY), run->left->data);
+            currentX = currentX + xDiff;
+            currentY = currentY - yDiff;
+            push(st, run->left);
+        }
+
+        if(run->right != NULL)
+        {
+            currentX += xDiff;
+            currentY += yDiff;
+            this->drawNode(painter, QPoint(currentX,currentY), run->right->data);
+            currentX -= xDiff;
+            currentY -= yDiff;
+            push(st, run->right);
+        }
+
+
+        res = pop(st, &run);
+        Q_ASSERT(res == STACK_SUCCESS || res == STACK_EMPTY);
+        if(res == BST_EMPTY)
+            break;
+
+    }
 }
 
 void RenderArea::drawNode(QPainter &painter, QPoint p, int number)

@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "renderarea.h"
+#include "bst.h"
 
 class RenderArea;
 
@@ -35,6 +36,8 @@ private:
     QAction *addNodeAction;
     QAction *deleteNodeAction;
     QAction *clearAllNodesAction;
+
+    //bst_t *m_bst;
 };
 
 #endif // MAINWINDOW_H
